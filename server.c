@@ -39,8 +39,8 @@ void *get_in_addr(struct sockaddr *sa)
 // Return a listening socket
 int get_listener_socket(void)
 {
-    int listener;     // Listening socket descriptor
-    int yes=1;        // For setsockopt() SO_REUSEADDR, below
+    int listener; // Listening socket descriptor
+    int yes = 1;  // For setsockopt() SO_REUSEADDR, below
     int rv;
 
     struct addrinfo hints, *ai, *p;
@@ -50,21 +50,25 @@ int get_listener_socket(void)
     hints.ai_family = AF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_flags = AI_PASSIVE;
-    if ((rv = getaddrinfo(NULL, PORT, &hints, &ai)) != 0) {
+    if ((rv = getaddrinfo(NULL, PORT, &hints, &ai)) != 0)
+    {
         fprintf(stderr, "selectserver: %s\n", gai_strerror(rv));
         exit(1);
     }
-    
-    for(p = ai; p != NULL; p = p->ai_next) {
+
+    for (p = ai; p != NULL; p = p->ai_next)
+    {
         listener = socket(p->ai_family, p->ai_socktype, p->ai_protocol);
-        if (listener < 0) { 
+        if (listener < 0)
+        {
             continue;
         }
-        
+
         // Lose the pesky "address already in use" error message
         setsockopt(listener, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int));
 
-        if (bind(listener, p->ai_addr, p->ai_addrlen) < 0) {
+        if (bind(listener, p->ai_addr, p->ai_addrlen) < 0)
+        {
             close(listener);
             continue;
         }
@@ -75,12 +79,14 @@ int get_listener_socket(void)
     freeaddrinfo(ai); // All done with this
 
     // If we got here, it means we didn't get bound
-    if (p == NULL) {
+    if (p == NULL)
+    {
         return -1;
     }
 
     // Listen
-    if (listen(listener, 10) == -1) {
+    if (listen(listener, 10) == -1)
+    {
         return -1;
     }
 
@@ -256,8 +262,8 @@ int handler_server(int listener) // handler_server
 
     addrlen = sizeof remoteaddr;
     newfd = accept(listener,
-                       (struct sockaddr *)&remoteaddr,
-                       &addrlen);
+                   (struct sockaddr *)&remoteaddr,
+                   &addrlen);
 
     if (newfd == -1)
     {
@@ -353,13 +359,14 @@ int main()
 
     if (listener == -1)
     {
-        fprintf(stderr, "error getting listening socket\n");////////////////
+        fprintf(stderr, "error getting listening socket\n"); ////////////////
         exit(1);
     }
 
-    addFd(globalReactor, listener, handler_server);
-    printf("Type something and press Enter. It will be echoed back to you.\n");
     startReactor(globalReactor);
+    addFd(globalReactor, listener, handler_server);
+    waitFor(globalReactor);
+    printf("Type something and press Enter. It will be echoed back to you.\n");
     freeReactor(globalReactor);
     return 0;
 }
