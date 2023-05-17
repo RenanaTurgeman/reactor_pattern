@@ -11,6 +11,8 @@
 #include <poll.h>
 #include "reactor.h"
 
+int handler_client(int fd);
+
 #define PORT "9034" // Port we're listening on
 
 Reactor *globalReactor;
@@ -37,8 +39,8 @@ void *get_in_addr(struct sockaddr *sa)
 // Return a listening socket
 int get_listener_socket(void)
 {
-    int listener; // Listening socket descriptor
-    int yes = 1;  // For setsockopt() SO_REUSEADDR, below
+    int listener;     // Listening socket descriptor
+    int yes=1;        // For setsockopt() SO_REUSEADDR, below
     int rv;
 
     struct addrinfo hints, *ai, *p;
@@ -48,25 +50,21 @@ int get_listener_socket(void)
     hints.ai_family = AF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_flags = AI_PASSIVE;
-    if ((rv = getaddrinfo(NULL, PORT, &hints, &ai)) != 0)
-    {
+    if ((rv = getaddrinfo(NULL, PORT, &hints, &ai)) != 0) {
         fprintf(stderr, "selectserver: %s\n", gai_strerror(rv));
         exit(1);
     }
-
-    for (p = ai; p != NULL; p = p->ai_next)
-    {
+    
+    for(p = ai; p != NULL; p = p->ai_next) {
         listener = socket(p->ai_family, p->ai_socktype, p->ai_protocol);
-        if (listener < 0)
-        {
+        if (listener < 0) { 
             continue;
         }
-
+        
         // Lose the pesky "address already in use" error message
         setsockopt(listener, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int));
 
-        if (bind(listener, p->ai_addr, p->ai_addrlen) < 0)
-        {
+        if (bind(listener, p->ai_addr, p->ai_addrlen) < 0) {
             close(listener);
             continue;
         }
@@ -77,14 +75,12 @@ int get_listener_socket(void)
     freeaddrinfo(ai); // All done with this
 
     // If we got here, it means we didn't get bound
-    if (p == NULL)
-    {
+    if (p == NULL) {
         return -1;
     }
 
     // Listen
-    if (listen(listener, 10) == -1)
-    {
+    if (listen(listener, 10) == -1) {
         return -1;
     }
 
@@ -117,6 +113,7 @@ void del_from_pfds(struct pollfd pfds[], int i, int *fd_count)
     (*fd_count)--;
 }
 
+/*
 int handler_server(void) // handler_server
 {
     int listener; // Listening socket descriptor
@@ -245,70 +242,148 @@ int handler_server(void) // handler_server
 
     return 0;
 }
+*/
 
-// int handler_server2(int listener) // handler_server
-// {
-//     int newfd;                          // Newly accept()ed socket descriptor
-//     struct sockaddr_storage remoteaddr; // Client address
-//     socklen_t addrlen;
-
-//     char buf[256]; // Buffer for client data
-
-//     char remoteIP[INET6_ADDRSTRLEN];
-
-//     addrlen = sizeof remoteaddr;
-//     int newfd = accept(listener,
-//                    (struct sockaddr *)&remoteaddr,
-//                    &addrlen);
-
-//     if (newfd == -1)
-//     {
-//         perror("accept");
-//     } else {
-//         addFd(globalReactor, newfd, &handler_clinent);
-//     }
-// }
-
-// int main()
-// {
-//     signal(SIGINT, sigintHandler); // Register the signal handler
-
-//     globalReactor = createReactor();
-//     int listener = get_listener_socket();
-
-//     if (listener == -1)
-//     {
-//         fprintf(stderr, "error getting listening socket\n");
-//         exit(1);
-//     }
-
-//     addFd(globalReactor, listener, handler_server2);
-//     printf("Type something and press Enter. It will be echoed back to you.\n");
-//     startReactor(globalReactor);
-//     freeReactor(globalReactor);
-//     return 0;
-// }
-
-void test2(int fd)
+int handler_server(int listener) // handler_server
 {
-    char tv = getchar();
-    while (tv != '\n')
+    int newfd;                          // Newly accept()ed socket descriptor
+    struct sockaddr_storage remoteaddr; // Client address
+    socklen_t addrlen;
+
+    char buf[256]; // Buffer for client data
+
+    char remoteIP[INET6_ADDRSTRLEN];
+
+    addrlen = sizeof remoteaddr;
+    newfd = accept(listener,
+                       (struct sockaddr *)&remoteaddr,
+                       &addrlen);
+
+    if (newfd == -1)
     {
-        printf("%c", tv);
-        tv = getchar();
+        perror("accept");
     }
-    printf("\n");
+    else
+    {
+        addFd(globalReactor, newfd, &handler_client);
+    }
+}
+
+// int handler_clinent()
+// {
+// // If not the listener, we're just a regular client
+// int nbytes = recv(pfds[i].fd, buf, sizeof buf, 0);
+
+// int sender_fd = pfds[i].fd;
+
+// if (nbytes <= 0)
+// {
+//     // Got error or connection closed by client
+//     if (nbytes == 0)
+//     {
+//         // Connection closed
+//         printf("pollserver: socket %d hung up\n", sender_fd);
+//     }
+//     else
+//     {
+//         perror("recv");
+//     }
+
+//     close(pfds[i].fd); // Bye!
+
+//     del_from_pfds(pfds, i, &fd_count);
+// }
+// else
+// {
+//     // We got some good data from a client
+//     buf[nbytes] = '\0'; // Null-terminate the data
+//     printf("Received data: %s\n", buf);
+
+//     for (int j = 0; j < fd_count; j++)
+//     {
+//         // Send to everyone!
+//         int dest_fd = pfds[j].fd;
+
+//         // Except the listener and ourselves
+//         if (dest_fd != listener && dest_fd != sender_fd)
+//         {
+//             // If you want to print the data to screen instead of sending it to all clients
+//             // We moved this block of code up, so we are not using it here anymore.
+//         }
+//     }
+// }
+// }
+
+int handler_client(int fd)
+{
+    char buf[256];
+    int nbytes = recv(fd, buf, sizeof(buf) - 1, 0);
+
+    if (nbytes <= 0)
+    {
+        // Got error or connection closed by client
+        if (nbytes == 0)
+        {
+            // Connection closed
+            printf("pollserver: socket %d hung up\n", fd);
+        }
+        else
+        {
+            perror("recv");
+        }
+
+        close(fd); // Bye!
+        delFd(globalReactor, fd);
+    }
+    else
+    {
+        // We got some good data from the client
+        buf[nbytes] = '\0'; // Null-terminate the data
+        printf("Received data: %s\n", buf);
+    }
+    return 0;
 }
 
 int main()
 {
-    Reactor *r = createReactor();
-    addFd(r, 0, &test2);
-    startReactor(r);
-    while (1)
+    signal(SIGINT, sigintHandler); // Register the signal handler
+
+    globalReactor = createReactor();
+    int listener = get_listener_socket();
+
+    if (listener == -1)
     {
-        /* code */
+        fprintf(stderr, "error getting listening socket\n");////////////////
+        exit(1);
     }
 
+    addFd(globalReactor, listener, handler_server);
+    printf("Type something and press Enter. It will be echoed back to you.\n");
+    startReactor(globalReactor);
+    freeReactor(globalReactor);
     return 0;
 }
+
+// void test2(int fd)
+// {
+//     char tv = getchar();
+//     while (tv != '\n')
+//     {
+//         printf("%c", tv);
+//         tv = getchar();
+//     }
+//     printf("\n");
+// }
+
+// int main()
+// {
+//     Reactor *r = createReactor();
+//     addFd(r, 0, &test2);
+//     startReactor(r);
+//     while (1)
+//     {
+//         /* code */
+//     }
+
+//     return 0;
+// }

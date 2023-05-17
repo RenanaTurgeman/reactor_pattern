@@ -78,6 +78,27 @@ void addFd(void* this, int fd, handler_t handler) {
     reactor->fdCount++;
 }
 
+void delFd(void* this, int fd) {
+    Reactor* reactor = (Reactor*)this;
+    int index = hashmap_get(reactor->fdToIndex, fd);
+    if (index >= 0) {
+        // Shift the elements after the index
+        for (int i = index; i < reactor->fdCount - 1; i++) {
+            reactor->fds[i] = reactor->fds[i + 1];
+            reactor->handlers[i] = reactor->handlers[i + 1];
+        }
+
+        reactor->fdCount--;
+
+        // Update the hashmap
+        // hashmap_remove(reactor->fdToIndex, fd);
+        // hashmap_delete(reactor->fdToIndex, fd);
+hashmap_remove(reactor->fdToIndex, fd);
+
+    }
+}
+
+
 void waitFor(void* this) {
     printf("waitFor reactor\n");
     ThreadData* threadData = (ThreadData*)this;

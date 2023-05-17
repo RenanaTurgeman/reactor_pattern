@@ -30,6 +30,8 @@ void* createReactor();
 void stopReactor(void*);
 void startReactor(void*);
 void addFd(void*, int fd, handler_t handler);
+void delFd(void* this, int fd);
+void hashmap_remove(Hashmap* map, int key);
 void waitFor(void*);
 void freeReactor(void*);
 void stdinHandler(int fd);

@@ -63,4 +63,25 @@ void hashmap_print(Hashmap* map) {
         }
     }
 }
+void hashmap_remove(Hashmap* map, int key) {
+    int index = hash(key);
+    Entry* entry = map->table[index];
+    Entry* prev = NULL;
+
+    while (entry != NULL) {
+        if (entry->key == key) {
+            if (prev != NULL) {
+                prev->next = entry->next;
+            } else {
+                map->table[index] = entry->next;
+            }
+            free(entry);
+            return;
+        }
+
+        prev = entry;
+        entry = entry->next;
+    }
+}
+
 
