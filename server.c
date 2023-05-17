@@ -13,8 +13,19 @@
 #include <netdb.h>
 #include <poll.h>
 
+#include "reactor.h"
+
+Reactor *globalReactor;
+
 #define PORT "9034" // Port we're listening on
 
+void sigintHandler(int sig_num)
+{
+    printf("\nCaught signal %d, cleaning up and exiting...\n", sig_num);
+    stopReactor(globalReactor);
+    freeReactor(globalReactor);
+    exit(0);
+}
 // Get sockaddr, IPv4 or IPv6:
 void *get_in_addr(struct sockaddr *sa)
 {
@@ -109,7 +120,7 @@ void del_from_pfds(struct pollfd pfds[], int i, int *fd_count)
     (*fd_count)--;
 }
 
-int main(void) // handler_server
+int handler_server(void)
 {
     int listener; // Listening socket descriptor
 
@@ -235,5 +246,17 @@ int main(void) // handler_server
         }     // END looping through file descriptors
     }         // END for(;;)--and you thought it would never end!
 
+    return 0;
+}
+
+int main()
+{
+    signal(SIGINT, sigintHandler); // Register the signal handler
+
+    globalReactor = createReactor();
+    addFd(globalReactor, STDIN_FILENO, handler_server);
+    printf("Type something and press Enter. It will be echoed back to you.\n");
+    startReactor(globalReactor);
+    freeReactor(globalReactor);
     return 0;
 }

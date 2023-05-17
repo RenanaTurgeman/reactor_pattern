@@ -1,10 +1,13 @@
 CC = gcc
 CFLAGS = -g -Wall
 
-all: reactor
+all: server
 
-reactor: reactor.o hashmap.o
-	$(CC) $(CFLAGS) -o reactor reactor.o hashmap.o
+server: server.o reactor.o hashmap.o
+	$(CC) $(CFLAGS) -o server server.o reactor.o hashmap.o
+
+server.o: server.c reactor.h
+	$(CC) $(CFLAGS) -c server.c
 
 reactor.o: reactor.c reactor.h hashmap.h
 	$(CC) $(CFLAGS) -c reactor.c
@@ -13,4 +16,4 @@ hashmap.o: hashmap.c hashmap.h
 	$(CC) $(CFLAGS) -c hashmap.c
 
 clean:
-	rm -f reactor reactor.o hashmap.o
+	rm -f server server.o reactor.o hashmap.o

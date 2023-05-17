@@ -3,14 +3,14 @@
 
 
 
-Reactor* globalReactor;
+// Reactor* globalReactor;
 
-void sigintHandler(int sig_num) {
-    printf("\nCaught signal %d, cleaning up and exiting...\n", sig_num);
-    stopReactor(globalReactor);
-    freeReactor(globalReactor);
-    exit(0);
-}
+// void sigintHandler(int sig_num) {
+//     printf("\nCaught signal %d, cleaning up and exiting...\n", sig_num);
+//     stopReactor(globalReactor);
+//     freeReactor(globalReactor);
+//     exit(0);
+// }
 
 void* createReactor() {
     printf("creat reactor\n");
@@ -99,16 +99,16 @@ void stdinHandler(int fd) {
     }
 }
 
-int main() {
-    signal(SIGINT, sigintHandler);  // Register the signal handler
+// int main() {
+//     signal(SIGINT, sigintHandler);  // Register the signal handler
 
-    globalReactor = createReactor();
-    addFd(globalReactor, STDIN_FILENO, stdinHandler);
-    printf("Type something and press Enter. It will be echoed back to you.\n");
-    startReactor(globalReactor);
-    freeReactor(globalReactor);
-    return 0;
-}
+//     globalReactor = createReactor();
+//     addFd(globalReactor, STDIN_FILENO, stdinHandler);
+//     printf("Type something and press Enter. It will be echoed back to you.\n");
+//     startReactor(globalReactor);
+//     freeReactor(globalReactor);
+//     return 0;
+// }
 
 
  
