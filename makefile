@@ -6,7 +6,7 @@ all: reactor
 reactor: reactor.o hashmap.o
 	$(CC) $(CFLAGS) -o reactor reactor.o hashmap.o
 
-reactor.o: reactor.c hashmap.h
+reactor.o: reactor.c reactor.h hashmap.h
 	$(CC) $(CFLAGS) -c reactor.c
 
 hashmap.o: hashmap.c hashmap.h

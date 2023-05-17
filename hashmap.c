@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdio.h>
 
 #include "hashmap.h"
 
@@ -52,3 +53,14 @@ void hashmap_free(Hashmap* map) {
     }
     free(map);
 }
+
+void hashmap_print(Hashmap* map) {
+    for (int i = 0; i < HASH_SIZE; i++) {
+        Entry* entry = map->table[i];
+        while (entry != NULL) {
+            printf("Key: %d, Value: %d\n", entry->key, entry->value);
+            entry = entry->next;
+        }
+    }
+}
+

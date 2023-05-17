@@ -17,3 +17,4 @@ int hash(int key);
 void hashmap_set(Hashmap* map, int key, int value);
 int hashmap_get(Hashmap* map, int key);
 void hashmap_free(Hashmap* map);
+void hashmap_print(Hashmap* map);
