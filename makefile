@@ -1,3 +1,27 @@
+
+
+
+
+# CC := gcc
+# CFLAGS := -Wall -Werror -fpic
+
+# LIBRARY := libreactor.so
+# LIB_SOURCES := reactor.c hashmap.c
+# LIB_OBJECTS := $(LIB_SOURCES:.c=.o)
+
+# all: $(LIBRARY)
+
+# $(LIBRARY): $(LIB_OBJECTS)
+# 	$(CC) -shared -o $@ $^
+
+# %.o: %.c
+# 	$(CC) $(CFLAGS) -c $< -o $@
+
+# clean:
+# 	rm -f $(LIBRARY) $(LIB_OBJECTS)
+
+
+
 CC = gcc
 CFLAGS = -g -Wall
 

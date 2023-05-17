@@ -86,18 +86,18 @@ void freeReactor(void* this) {
 }
 
 // A handler function that will be called when stdin is ready for reading
-void stdinHandler(int fd) {
-    printf("stdinHandler reactor\n");
-    char buffer[1024];
-    ssize_t bytes = read(fd, buffer, sizeof(buffer) - 1);
-    if (bytes > 0) {
-        buffer[bytes] = '\0';
-        printf("Received: %s", buffer);
-    } else {
-        printf("EOF or read error\n");
-        exit(EXIT_FAILURE);  // Stop the program if we can't read from stdin anymore
-    }
-}
+// void stdinHandler(int fd) {
+//     printf("stdinHandler reactor\n");
+//     char buffer[1024];
+//     ssize_t bytes = read(fd, buffer, sizeof(buffer) - 1);
+//     if (bytes > 0) {
+//         buffer[bytes] = '\0';
+//         printf("Received: %s", buffer);
+//     } else {
+//         printf("EOF or read error\n");
+//         exit(EXIT_FAILURE);  // Stop the program if we can't read from stdin anymore
+//     }
+// }
 
 // int main() {
 //     signal(SIGINT, sigintHandler);  // Register the signal handler
