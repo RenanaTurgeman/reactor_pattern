@@ -246,48 +246,48 @@ int handler_server(void) // handler_server
     return 0;
 }
 
-int handler_server2(int listener) // handler_server
-{
-    int newfd;                          // Newly accept()ed socket descriptor
-    struct sockaddr_storage remoteaddr; // Client address
-    socklen_t addrlen;
+// int handler_server2(int listener) // handler_server
+// {
+//     int newfd;                          // Newly accept()ed socket descriptor
+//     struct sockaddr_storage remoteaddr; // Client address
+//     socklen_t addrlen;
 
-    char buf[256]; // Buffer for client data
+//     char buf[256]; // Buffer for client data
 
-    char remoteIP[INET6_ADDRSTRLEN];
+//     char remoteIP[INET6_ADDRSTRLEN];
 
-    addrlen = sizeof remoteaddr;
-    int newfd = accept(listener,
-                   (struct sockaddr *)&remoteaddr,
-                   &addrlen);
+//     addrlen = sizeof remoteaddr;
+//     int newfd = accept(listener,
+//                    (struct sockaddr *)&remoteaddr,
+//                    &addrlen);
 
-    if (newfd == -1)
-    {
-        perror("accept");
-    } else {
-        addFd(globalReactor, newfd, &handler_clinent);
-    }
-}
+//     if (newfd == -1)
+//     {
+//         perror("accept");
+//     } else {
+//         addFd(globalReactor, newfd, &handler_clinent);
+//     }
+// }
 
-int main()
-{
-    signal(SIGINT, sigintHandler); // Register the signal handler
+// int main()
+// {
+//     signal(SIGINT, sigintHandler); // Register the signal handler
 
-    globalReactor = createReactor();
-    int listener = get_listener_socket();
+//     globalReactor = createReactor();
+//     int listener = get_listener_socket();
 
-    if (listener == -1)
-    {
-        fprintf(stderr, "error getting listening socket\n");
-        exit(1);
-    }
+//     if (listener == -1)
+//     {
+//         fprintf(stderr, "error getting listening socket\n");
+//         exit(1);
+//     }
 
-    addFd(globalReactor, listener, handler_server2);
-    printf("Type something and press Enter. It will be echoed back to you.\n");
-    startReactor(globalReactor);
-    freeReactor(globalReactor);
-    return 0;
-}
+//     addFd(globalReactor, listener, handler_server2);
+//     printf("Type something and press Enter. It will be echoed back to you.\n");
+//     startReactor(globalReactor);
+//     freeReactor(globalReactor);
+//     return 0;
+// }
 
 void test2(int fd)
 {
@@ -300,7 +300,7 @@ void test2(int fd)
     printf("\n");
 }
 
-int main2()
+int main()
 {
     Reactor *r = createReactor();
     addFd(r, 0, &test2);

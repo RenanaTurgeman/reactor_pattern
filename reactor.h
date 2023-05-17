@@ -4,6 +4,8 @@
 #include <sys/poll.h>
 #include <stdbool.h>
 #include <signal.h>
+#include <pthread.h>
+
 
 #include "hashmap.h"
 
@@ -17,6 +19,12 @@ typedef struct {
     Hashmap* fdToIndex; 
 } Reactor;
 
+typedef struct {
+    Reactor* reactor;
+    pthread_t thread;
+} ThreadData;
+
+void* reactorThread(void* arg);
 void sigintHandler(int sig_num);
 void* createReactor();
 void stopReactor(void*);

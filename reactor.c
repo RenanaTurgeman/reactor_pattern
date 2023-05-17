@@ -1,8 +1,6 @@
 
 #include "reactor.h" 
 
-
-
 // Reactor* globalReactor;
 
 // void sigintHandler(int sig_num) {
@@ -11,6 +9,26 @@
 //     freeReactor(globalReactor);
 //     exit(0);
 // }
+
+void* reactorThread(void* arg) {
+    ThreadData* threadData = (ThreadData*)arg;
+    Reactor* reactor = threadData->reactor;
+
+    while (reactor->isRunning) {
+        int readyCount = poll(reactor->fds, reactor->fdCount, -1);
+        if (readyCount <= 0) {
+            continue;
+        }
+
+        for (int i = 0; i < reactor->fdCount; i++) {
+            if (reactor->fds[i].revents & POLLIN) {
+                reactor->handlers[i](reactor->fds[i].fd);
+            }
+        }
+    }
+
+    return NULL;
+}
 
 void* createReactor() {
     printf("creat reactor\n");
@@ -31,18 +49,16 @@ void stopReactor(void* this) {
 void startReactor(void* this) {
     printf("start reactor\n");
     Reactor* reactor = this;
-    reactor->isRunning = true;
-    while(reactor->isRunning) {
-        int readyCount = poll(reactor->fds, reactor->fdCount, -1);
-        if (readyCount <= 0) {
-            continue;
-        }
 
-        for (int i = 0; i < reactor->fdCount; i++) {
-            if (reactor->fds[i].revents & POLLIN) {
-                reactor->handlers[i](reactor->fds[i].fd);
-            }
-        }
+    ThreadData* threadData = malloc(sizeof(ThreadData));
+    threadData->reactor = reactor;
+
+    reactor->isRunning = true;
+
+    int result = pthread_create(&(threadData->thread), NULL, reactorThread, (void*)threadData);
+    if (result != 0) {
+        fprintf(stderr, "Failed to create reactor thread\n");
+        return;
     }
 }
 
@@ -64,12 +80,11 @@ void addFd(void* this, int fd, handler_t handler) {
 
 void waitFor(void* this) {
     printf("waitFor reactor\n");
-    // If you were to implement a separate thread for the reactor, you would put pthread_join here.
-    // As the current implementation doesn't use threads, we can just wait until the reactor is no longer running.
-    while (((Reactor*)this)->isRunning) {
-        sleep(1);
-    }
+    ThreadData* threadData = (ThreadData*)this;
+    pthread_join(threadData->thread, NULL);
+    free(threadData);
 }
+
 void freeReactor(void* this) {
     printf("free reactor\n");
     Reactor* reactor = this;
@@ -84,6 +99,7 @@ void freeReactor(void* this) {
 
     free(reactor);
 }
+
 
 // A handler function that will be called when stdin is ready for reading
 // void stdinHandler(int fd) {
