@@ -1,11 +1,6 @@
 #include "reactor.h" 
-// Reactor* globalReactor;
-// void sigintHandler(int sig_num) {
-//     printf("\nCaught signal %d, cleaning up and exiting...\n", sig_num);
-//     stopReactor(globalReactor);
-//     freeReactor(globalReactor);
-//     exit(0);
-// }
+
+
 void* createReactor() {
     printf("creat reactor\n");
     Reactor* reactor = malloc(sizeof(Reactor));
@@ -60,9 +55,6 @@ void delFd(void* this, int fd) {
 
         reactor->fdCount--;
 
-        // Update the hashmap
-        // hashmap_remove(reactor->fdToIndex, fd);
-        // hashmap_delete(reactor->fdToIndex, fd);
 hashmap_remove(reactor->fdToIndex, fd);
 
     }
@@ -87,39 +79,3 @@ void freeReactor(void* this) {
     }
     free(reactor);
 }
-
-// // A handler function that will be called when stdin is ready for reading
-// void stdinHandler(int fd) {
-//     printf("stdinHandler reactor\n");
-//     char buffer[1024];
-//     ssize_t bytes = read(fd, buffer, sizeof(buffer) - 1);
-//     if (bytes > 0) {
-//         buffer[bytes] = '\0';
-//         printf("Received: %s", buffer);
-//     } else {
-//         printf("EOF or read error\n");
-//         exit(EXIT_FAILURE);  // Stop the program if we can't read from stdin anymore
-//     }
-// }
-// void stdinHandler(int fd) {
-//     printf("stdinHandler reactor\n");
-//     char buffer[1024];
-//     ssize_t bytes = read(fd, buffer, sizeof(buffer) - 1);
-//     if (bytes > 0) {
-//         buffer[bytes] = '\0';
-//         printf("Received: %s", buffer);
-//     } else {
-//         printf("EOF or read error\n");
-//         exit(EXIT_FAILURE);  // Stop the program if we can't read from stdin anymore
-//     }
-// }
-
-// int main() {
-//     signal(SIGINT, sigintHandler);  // Register the signal handler
-//     globalReactor = createReactor();
-//     addFd(globalReactor, STDIN_FILENO, stdinHandler);
-//     printf("Type something and press Enter. It will be echoed back to you.\n");
-//     startReactor(globalReactor);
-//     freeReactor(globalReactor);
-//     return 0;
-// }
