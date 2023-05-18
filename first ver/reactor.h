@@ -4,6 +4,19 @@
 #include <poll.h>
 #include <pthread.h>
 #include <stdbool.h>
+#include <stdlib.h>
+#include <unistd.h>
+
+
+
+struct Reactor {
+    struct pollfd* fds;
+    handler_t* handlers;
+    int fd_count;
+    int fd_size;
+    bool running;
+    pthread_t thread;
+};
 
 typedef struct Reactor Reactor;
 
