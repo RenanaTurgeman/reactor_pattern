@@ -1,43 +1,49 @@
 
-
-
-
-# CC := gcc
-# CFLAGS := -Wall -Werror -fpic
-
-# LIBRARY := libreactor.so
-# LIB_SOURCES := reactor.c hashmap.c
-# LIB_OBJECTS := $(LIB_SOURCES:.c=.o)
-
-# all: $(LIBRARY)
-
-# $(LIBRARY): $(LIB_OBJECTS)
-# 	$(CC) -shared -o $@ $^
-
-# %.o: %.c
-# 	$(CC) $(CFLAGS) -c $< -o $@
-
-# clean:
-# 	rm -f $(LIBRARY) $(LIB_OBJECTS)
-
-
-
 CC = gcc
 CFLAGS = -g -Wall
+LIBS = -lpthread
+SHAREDLIB = -shared
+RM = rm -f
 
 all: server
 
-server: server.o reactor.o hashmap.o
-	$(CC) $(CFLAGS) -o server server.o reactor.o hashmap.o
+server: server.o libreactor.so hashmap.o
+	$(CC) $(CFLAGS) -o server server.o hashmap.o -L. -lreactor
 
 server.o: server.c reactor.h
 	$(CC) $(CFLAGS) -c server.c
 
+libreactor.so: reactor.o
+	$(CC) $(CFLAGS) $(SHAREDLIB) -o libreactor.so reactor.o
+
 reactor.o: reactor.c reactor.h hashmap.h
-	$(CC) $(CFLAGS) -c reactor.c
+	$(CC) $(CFLAGS) -fPIC -c reactor.c
 
 hashmap.o: hashmap.c hashmap.h
 	$(CC) $(CFLAGS) -c hashmap.c
 
 clean:
-	rm -f server server.o reactor.o hashmap.o
+	$(RM) server server.o reactor.o hashmap.o libreactor.so
+
+
+
+
+# CC = gcc
+# CFLAGS = -g -Wall
+
+# all: server
+
+# server: server.o reactor.o hashmap.o
+# 	$(CC) $(CFLAGS) -o server server.o reactor.o hashmap.o
+
+# server.o: server.c reactor.h
+# 	$(CC) $(CFLAGS) -c server.c
+
+# reactor.o: reactor.c reactor.h hashmap.h
+# 	$(CC) $(CFLAGS) -c reactor.c
+
+# hashmap.o: hashmap.c hashmap.h
+# 	$(CC) $(CFLAGS) -c hashmap.c
+
+# clean:
+# 	rm -f server server.o reactor.o hashmap.o

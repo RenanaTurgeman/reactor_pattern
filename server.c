@@ -176,6 +176,7 @@ int handler_client(int fd)
 
 int main()
 {
+    
     signal(SIGINT, sigintHandler); // Register the signal handler
 
     globalReactor = createReactor();
