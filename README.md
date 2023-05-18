@@ -48,7 +48,13 @@ The server follows the reactor design pattern, which allows it to handle multipl
 
 The main components of the server are:
 
-react_server.c: The main entry point of the server. It sets up the necessary components, such as signal handlers, and starts the reactor.
-reactor.h and reactor.c: Implements the reactor structure and its related functions. The reactor manages the file descriptors and their associated event handlers. It uses the poll/select mechanism to wait for incoming data and dispatches the appropriate event handlers.
-hashmap.h and hashmap.c: A hashmap implementation used by the reactor to map file descriptors to their corresponding event handlers.
+##### react_server.c:
+The main entry point of the server. It sets up the necessary components, such as signal handlers, and starts the reactor.
+
+##### reactor.h and reactor.c:
+Implements the reactor structure and its related functions. The reactor manages the file descriptors and their associated event handlers. It uses the poll/select mechanism to wait for incoming data and dispatches the appropriate event handlers.
+
+
+##### hashmap.h and hashmap.c:
+A hashmap implementation used by the reactor to map file descriptors to their corresponding event handlers.
 
