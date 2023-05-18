@@ -1,4 +1,3 @@
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -9,6 +8,8 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <poll.h>
+
+
 #include "reactor.h"
 
 void handler_client(int fd);
@@ -39,8 +40,8 @@ void *get_in_addr(struct sockaddr *sa)
 // Return a listening socket
 int get_listener_socket(void)
 {
-    int listener; // Listening socket descriptor
-    int yes = 1;  // For setsockopt() SO_REUSEADDR, below
+    int listener; 
+    int yes = 1;
     int rv;
 
     struct addrinfo hints, *ai, *p;
@@ -190,27 +191,3 @@ int main()
     freeReactor(globalReactor);
     return 0;
 }
-
-// void test2(int fd)
-// {
-//     char tv = getchar();
-//     while (tv != '\n')
-//     {
-//         printf("%c", tv);
-//         tv = getchar();
-//     }
-//     printf("\n");
-// }
-
-// int main()
-// {
-//     Reactor *r = createReactor();
-//     addFd(r, 0, &test2);
-//     startReactor(r);
-//     while (1)
-//     {
-//         /* code */
-//     }
-
-//     return 0;
-// }
