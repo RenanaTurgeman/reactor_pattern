@@ -11,9 +11,9 @@
 #include <poll.h>
 #include "reactor.h"
 
-int handler_client(int fd);
+void handler_client(int fd);
 
-#define PORT "9034" // Port we're listening on
+#define PORT "9034"
 
 Reactor *globalReactor;
 
@@ -119,15 +119,11 @@ void del_from_pfds(struct pollfd pfds[], int i, int *fd_count)
     (*fd_count)--;
 }
 
-int handler_server(int listener) // handler_server
+void handler_server(int listener) // handler_server
 {
     int newfd;                          // Newly accept()ed socket descriptor
     struct sockaddr_storage remoteaddr; // Client address
     socklen_t addrlen;
-
-    char buf[256]; // Buffer for client data
-
-    char remoteIP[INET6_ADDRSTRLEN];
 
     addrlen = sizeof remoteaddr;
     newfd = accept(listener,
@@ -144,7 +140,7 @@ int handler_server(int listener) // handler_server
     }
 }
 
-int handler_client(int fd)
+void handler_client(int fd)
 {
     char buf[256];
     int nbytes = recv(fd, buf, sizeof(buf) - 1, 0);
@@ -171,12 +167,11 @@ int handler_client(int fd)
         buf[nbytes] = '\0'; // Null-terminate the data
         printf("Received data: %s\n", buf);
     }
-    return 0;
 }
 
 int main()
 {
-    
+
     signal(SIGINT, sigintHandler); // Register the signal handler
 
     globalReactor = createReactor();
