@@ -8,14 +8,12 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <poll.h>
-
-
+#include <netinet/tcp.h>
 #include "reactor.h"
-
-void handler_client(int fd);
 
 #define PORT "9034"
 
+void handler_client(int fd);
 Reactor *globalReactor;
 
 void sigintHandler(int sig_num)
@@ -40,7 +38,7 @@ void *get_in_addr(struct sockaddr *sa)
 // Return a listening socket
 int get_listener_socket(void)
 {
-    int listener; 
+    int listener;
     int yes = 1;
     int rv;
 
@@ -65,7 +63,7 @@ int get_listener_socket(void)
             continue;
         }
 
-        // Lose the pesky "address already in use" error message
+        // // Lose the pesky "address already in use" error message
         setsockopt(listener, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int));
 
         if (bind(listener, p->ai_addr, p->ai_addrlen) < 0)
@@ -93,6 +91,7 @@ int get_listener_socket(void)
 
     return listener;
 }
+
 
 // Add a new file descriptor to the set
 void add_to_pfds(struct pollfd *pfds[], int newfd, int *fd_count, int *fd_size)
@@ -144,6 +143,7 @@ void handler_server(int listener) // handler_server
 void handler_client(int fd)
 {
     char buf[256];
+    printf("before recv \n");
     int nbytes = recv(fd, buf, sizeof(buf) - 1, 0);
 
     if (nbytes <= 0)
