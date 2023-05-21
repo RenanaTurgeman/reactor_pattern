@@ -9,11 +9,16 @@
 #include <netdb.h>
 #include <poll.h>
 #include <netinet/tcp.h>
+#include <fcntl.h>
+#include <errno.h>
+
 #include "reactor.h"
 
 #define PORT "9034"
 
 void handler_client(int fd);
+int setSocketNonBlocking(int fd); 
+
 Reactor *globalReactor;
 
 void sigintHandler(int sig_num)
@@ -119,10 +124,10 @@ void del_from_pfds(struct pollfd pfds[], int i, int *fd_count)
     (*fd_count)--;
 }
 
-void handler_server(int listener) // handler_server
+void handler_server(int listener)
 {
-    int newfd;                          // Newly accept()ed socket descriptor
-    struct sockaddr_storage remoteaddr; // Client address
+    int newfd;
+    struct sockaddr_storage remoteaddr;
     socklen_t addrlen;
 
     addrlen = sizeof remoteaddr;
@@ -136,8 +141,35 @@ void handler_server(int listener) // handler_server
     }
     else
     {
+        if (setSocketNonBlocking(newfd) < 0) 
+        {
+            close(newfd);
+            return;
+        }
         addFd(globalReactor, newfd, &handler_client);
     }
+}
+
+
+int setSocketNonBlocking(int fd) 
+{
+    int flags;
+
+    // Get the current flags for the socket
+    if ((flags = fcntl(fd, F_GETFL, NULL)) < 0) 
+    {
+        perror("fcntl");
+        return -1;
+    }
+
+    // Set the socket to non-blocking
+    if (fcntl(fd, F_SETFL, flags | O_NONBLOCK) < 0) 
+    {
+        perror("fcntl");
+        return -1;
+    }
+
+    return 0;
 }
 
 void handler_client(int fd)
@@ -148,27 +180,28 @@ void handler_client(int fd)
 
     if (nbytes <= 0)
     {
-        // Got error or connection closed by client
-        if (nbytes == 0)
+        if (nbytes == 0 || (nbytes == -1 && errno != EAGAIN && errno != EWOULDBLOCK))
         {
-            // Connection closed
-            printf("pollserver: socket %d hung up\n", fd);
-        }
-        else
-        {
-            perror("recv");
-        }
+            if (nbytes == 0)
+            {
+                printf("pollserver: socket %d hung up\n", fd);
+            }
+            else
+            {
+                perror("recv");
+            }
 
-        close(fd); // Bye!
-        delFd(globalReactor, fd);
+            close(fd); 
+            delFd(globalReactor, fd);
+        }
     }
     else
     {
-        // We got some good data from the client
-        buf[nbytes] = '\0'; // Null-terminate the data
+        buf[nbytes] = '\0';
         printf("Received data: %s\n", buf);
     }
 }
+
 
 int main()
 {
