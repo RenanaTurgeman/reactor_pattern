@@ -43,7 +43,7 @@ void *reactorRun(void *this)
 
     while (reactor->isRunning)
     {
-        int readyCount = poll(reactor->fds, reactor->fdCount, 5000); //-1
+        int readyCount = poll(reactor->fds, reactor->fdCount, -1);
         if (readyCount <= 0)
         {
             continue;
