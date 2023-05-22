@@ -5,7 +5,7 @@ void *createReactor()
     printf("create reactor\n");
     Reactor *reactor = malloc(sizeof(Reactor));
     reactor->isRunning = false;
-    reactor->fds =  malloc(10 * sizeof(struct pollfd)); // Allocate memory for 10 struct pollfd elements
+    reactor->fds =  malloc(20 * sizeof(struct pollfd)); // Allocate memory for 10 struct pollfd elements
     reactor->handlers = NULL;
     reactor->fdCount = 1; 
     reactor->fdToIndex = hashmap_create();

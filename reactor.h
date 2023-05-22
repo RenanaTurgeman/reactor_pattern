@@ -13,6 +13,7 @@ typedef void (*handler_t)(int fd);
 typedef struct {
     bool isRunning;
     struct pollfd* fds;
+    int numPoll;
     handler_t* handlers;
     int fdCount;
     Hashmap* fdToIndex;
