@@ -1,6 +1,8 @@
 #include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
 
-#define HASH_SIZE 128
+#define HASH_SIZE 256
 
 typedef struct Entry {
     int key;

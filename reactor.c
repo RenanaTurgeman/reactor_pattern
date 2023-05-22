@@ -5,9 +5,9 @@ void *createReactor()
     printf("create reactor\n");
     Reactor *reactor = malloc(sizeof(Reactor));
     reactor->isRunning = false;
-    reactor->fds = NULL;
+    reactor->fds =  malloc(10 * sizeof(struct pollfd)); // Allocate memory for 10 struct pollfd elements
     reactor->handlers = NULL;
-    reactor->fdCount = 1; // Changed from 0 to 1
+    reactor->fdCount = 1; 
     reactor->fdToIndex = hashmap_create();
     reactor->thread = 0;
     return reactor;
@@ -43,7 +43,7 @@ void *reactorRun(void *this)
 
     while (reactor->isRunning)
     {
-        int readyCount = poll(reactor->fds, reactor->fdCount, -1); 
+        int readyCount = poll(reactor->fds, reactor->fdCount, 5000); //-1
         if (readyCount <= 0)
         {
             continue;
@@ -69,14 +69,16 @@ void addFd(void *this, int fd, handler_t handler)
     printf("Adding fd %d with handler %p\n", fd, handler);
     printf("addFD reactor\n");
     Reactor *reactor = this;
-    reactor->fds = realloc(reactor->fds, (reactor->fdCount + 1) * sizeof(struct pollfd));
-    reactor->handlers = realloc(reactor->handlers, (reactor->fdCount + 1) * sizeof(handler_t));
-    reactor->fds[reactor->fdCount].fd = fd;
-    reactor->fds[reactor->fdCount].events = POLLIN;
-    reactor->handlers[reactor->fdCount] = handler;
+    reactor->fdCount++;
+    // reactor->fds = realloc(reactor->fds, (reactor->fdCount) * sizeof(struct pollfd));
+
+    reactor->handlers = realloc(reactor->handlers, (reactor->fdCount) * sizeof(handler_t));
+    reactor->fds[reactor->fdCount - 1].fd = fd;
+    reactor->fds[reactor->fdCount - 1].events = POLLIN;
+    reactor->handlers[reactor->fdCount - 1] = handler;
     hashmap_set(reactor->fdToIndex, fd, reactor->fdCount);
     hashmap_print(reactor->fdToIndex);
-    reactor->fdCount++;
+    printf("sum of fdCount = %d \n", reactor->fdCount);
 }
 
 void delFd(void *this, int fd)
@@ -120,3 +122,8 @@ void freeReactor(void *this)
     }
     free(reactor);
 }
+
+
+
+
+

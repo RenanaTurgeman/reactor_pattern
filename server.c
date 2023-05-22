@@ -98,22 +98,22 @@ int get_listener_socket(void)
 }
 
 
-// Add a new file descriptor to the set
-void add_to_pfds(struct pollfd *pfds[], int newfd, int *fd_count, int *fd_size)
-{
-    // If we don't have room, add more space in the pfds array
-    if (*fd_count == *fd_size)
-    {
-        *fd_size *= 2; // Double it
+// // Add a new file descriptor to the set
+// void add_to_pfds(struct pollfd *pfds[], int newfd, int *fd_count, int *fd_size)
+// {
+//     // If we don't have room, add more space in the pfds array
+//     if (*fd_count == *fd_size)
+//     {
+//         *fd_size *= 2; // Double it
 
-        *pfds = realloc(*pfds, sizeof(**pfds) * (*fd_size));
-    }
+//         *pfds = realloc(*pfds, sizeof(**pfds) * (*fd_size));
+//     }
 
-    (*pfds)[*fd_count].fd = newfd;
-    (*pfds)[*fd_count].events = POLLIN; // Check ready-to-read
+//     (*pfds)[*fd_count].fd = newfd;
+//     (*pfds)[*fd_count].events = POLLIN; // Check ready-to-read
 
-    (*fd_count)++;
-}
+//     (*fd_count)++;
+// }
 
 // Remove an index from the set
 void del_from_pfds(struct pollfd pfds[], int i, int *fd_count)
@@ -174,8 +174,7 @@ int setSocketNonBlocking(int fd)
 
 void handler_client(int fd)
 {
-    char buf[256];
-    printf("before recv \n");
+    char buf[1024];  // Increase the buffer size
     int nbytes = recv(fd, buf, sizeof(buf) - 1, 0);
 
     if (nbytes <= 0)
@@ -191,7 +190,7 @@ void handler_client(int fd)
                 perror("recv");
             }
 
-            close(fd); 
+            close(fd);
             delFd(globalReactor, fd);
         }
     }
@@ -199,8 +198,13 @@ void handler_client(int fd)
     {
         buf[nbytes] = '\0';
         printf("Received data: %s\n", buf);
+        
+        // Send an acknowledgement message to the client
+        const char* msg = "Message received\n";
+        send(fd, msg, strlen(msg), 0);  // Don't forget to check for errors in a real scenario!
     }
 }
+
 
 
 int main()

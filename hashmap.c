@@ -1,6 +1,3 @@
-#include <stdlib.h>
-#include <stdio.h>
-
 #include "hashmap.h"
 
 int hash(int key) {
@@ -39,7 +36,7 @@ int hashmap_get(Hashmap* map, int key) {
         }
         entry = entry->next;
     }
-    return -1;  // Returns -1 if key not found. You should adjust this based on your needs.
+    return -1; 
 }
 
 void hashmap_free(Hashmap* map) {
