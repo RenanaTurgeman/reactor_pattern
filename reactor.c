@@ -5,7 +5,7 @@ void *createReactor()
     printf("create reactor\n");
     Reactor *reactor = malloc(sizeof(Reactor));
     reactor->isRunning = false;
-    reactor->fds =  malloc(20 * sizeof(struct pollfd)); // Allocate memory for 10 struct pollfd elements
+    reactor->fds =  malloc(10 * sizeof(struct pollfd)); // Allocate memory for 10 struct pollfd elements
     reactor->handlers = NULL;
     reactor->fdCount = 1; 
     reactor->fdToIndex = hashmap_create();
@@ -81,19 +81,37 @@ void addFd(void *this, int fd, handler_t handler)
     printf("sum of fdCount = %d \n", reactor->fdCount);
 }
 
+// void delFd(void *this, int fd)
+// {
+//     Reactor *reactor = (Reactor *)this;
+//     int index = hashmap_get(reactor->fdToIndex, fd);
+//     if (index >= 0)
+//     {
+//         for (int i = index; i < reactor->fdCount - 1; i++)
+//         {
+//             reactor->fds[i] = reactor->fds[i + 1];
+//             reactor->handlers[i] = reactor->handlers[i + 1];
+//         }
+//         reactor->fdCount--;
+//         printf("remove........");
+//         hashmap_remove(reactor->fdToIndex, fd);
+//     }
+// }
+
 void delFd(void *this, int fd)
 {
     Reactor *reactor = (Reactor *)this;
     int index = hashmap_get(reactor->fdToIndex, fd);
     if (index >= 0)
     {
-        for (int i = index; i < reactor->fdCount - 1; i++)
-        {
-            reactor->fds[i] = reactor->fds[i + 1];
-            reactor->handlers[i] = reactor->handlers[i + 1];
-        }
-        reactor->fdCount--;
+        // Remove the entry from the hashmap
         hashmap_remove(reactor->fdToIndex, fd);
+
+        // Move the last element to the deleted position
+        reactor->fds[index] = reactor->fds[reactor->fdCount - 1];
+        reactor->handlers[index] = reactor->handlers[reactor->fdCount - 1];
+
+        reactor->fdCount--;
     }
 }
 
