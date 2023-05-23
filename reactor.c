@@ -48,9 +48,10 @@ void *reactorRun(void *this)
     while (reactor->isRunning)
     {
         int readyCount = poll(reactor->fds, reactor->fdCount, -1);
-        if (readyCount <= 0)
+        if (readyCount == -1)
         {
-            continue;
+            perror("poll()");
+            return NULL;
         }
         for (int i = 0; i < reactor->fdCount; i++)
         {
@@ -58,10 +59,13 @@ void *reactorRun(void *this)
             {
                 reactor->handlers[i](reactor->fds[i].fd);
             }
-            else if (reactor->fds[i].revents & (POLLHUP | POLLNVAL | POLLERR))
-            {
-                delFd(reactor, reactor->fds[i].fd);
-            }
+            // else if (i != 0 && (reactor->fds[i].revents & POLLHUP
+            // || reactor->fds[i].revents & POLLNVAL
+            // || reactor->fds[i].revents & POLLERR ))
+            // {
+            //     delFd(reactor, reactor->fds[i].fd);
+            // }
+
         }
     }
     printf("Reactor thread finished.\n");
@@ -82,24 +86,6 @@ void addFd(void *this, int fd, handler_t handler)
     hashmap_print(reactor->fdToIndex);
     printf("Current fdCount: %d\n", reactor->fdCount);
 }
-
-
-// void delFd(void *this, int fd)
-// {
-//     Reactor *reactor = (Reactor *)this;
-//     int index = hashmap_get(reactor->fdToIndex, fd);
-//     if (index >= 0)
-//     {
-//         for (int i = index; i < reactor->fdCount - 1; i++)
-//         {
-//             reactor->fds[i] = reactor->fds[i + 1];
-//             reactor->handlers[i] = reactor->handlers[i + 1];
-//         }
-//         reactor->fdCount--;
-//         printf("remove........");
-//         hashmap_remove(reactor->fdToIndex, fd);
-//     }
-// }
 
 void delFd(void *this, int fd)
 {
