@@ -5,7 +5,7 @@ void *createReactor()
     printf("create reactor\n");
     Reactor *reactor = malloc(sizeof(Reactor));
     reactor->isRunning = false;
-    reactor->fds =  malloc(10 * sizeof(struct pollfd)); // Allocate memory for 10 struct pollfd elements
+    reactor->fds =  malloc(sizeof(struct pollfd)); // Allocate memory for struct pollfd elements
     reactor->handlers = NULL;
     reactor->fdCount = 1; 
     reactor->fdToIndex = hashmap_create();
@@ -25,6 +25,8 @@ void stopReactor(void *this)
         pthread_join(reactor->thread, NULL);
         pthread_detach(reactor->thread);
     }
+        printf("end stop\n");
+
 }
 
 void startReactor(void *this)
@@ -33,6 +35,8 @@ void startReactor(void *this)
     Reactor *reactor = this;
     reactor->isRunning = true;
     pthread_create(&reactor->thread, NULL, reactorRun, reactor);
+        printf("end start\n");
+
 }
 
 void *reactorRun(void *this)
@@ -67,19 +71,18 @@ void *reactorRun(void *this)
 void addFd(void *this, int fd, handler_t handler)
 {
     printf("Adding fd %d with handler %p\n", fd, handler);
-    printf("addFD reactor\n");
     Reactor *reactor = this;
     reactor->fdCount++;
-    // reactor->fds = realloc(reactor->fds, (reactor->fdCount) * sizeof(struct pollfd));
-
-    reactor->handlers = realloc(reactor->handlers, (reactor->fdCount) * sizeof(handler_t));
+    reactor->fds = realloc(reactor->fds, reactor->fdCount * sizeof(struct pollfd));
+    reactor->handlers = realloc(reactor->handlers, reactor->fdCount * sizeof(handler_t));
     reactor->fds[reactor->fdCount - 1].fd = fd;
     reactor->fds[reactor->fdCount - 1].events = POLLIN;
     reactor->handlers[reactor->fdCount - 1] = handler;
-    hashmap_set(reactor->fdToIndex, fd, reactor->fdCount);
+    hashmap_set(reactor->fdToIndex, fd, reactor->fdCount - 1);
     hashmap_print(reactor->fdToIndex);
-    printf("sum of fdCount = %d \n", reactor->fdCount);
+    printf("Current fdCount: %d\n", reactor->fdCount);
 }
+
 
 // void delFd(void *this, int fd)
 // {
@@ -111,9 +114,13 @@ void delFd(void *this, int fd)
         reactor->fds[index] = reactor->fds[reactor->fdCount - 1];
         reactor->handlers[index] = reactor->handlers[reactor->fdCount - 1];
 
+        // Update the index of the moved element in the hashmap
+        // hashmap_set(reactor->fdToIndex, reactor->fds[index].fd, index);
+
         reactor->fdCount--;
     }
 }
+
 
 void waitFor(void *this)
 {

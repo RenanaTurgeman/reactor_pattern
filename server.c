@@ -159,7 +159,7 @@ void handler_client(int fd)
     else
     {
         buf[nbytes] = '\0';
-        printf("Received data: %s\n", buf);
+        printf("\x1b[36m Received data from client %d:\x1b[0m\n \x1b[35m%s\x1b[0m\n", fd-3 , buf);
         
         // Send an acknowledgement message to the client
         const char* msg = "Message received\n";
